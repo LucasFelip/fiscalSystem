@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadastro</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/dist/bcrypt.min.js"></script>
+</head>
+<body>
+<div class="container">
+  <h2>Cadastrar</h2>
+  <form id="registerForm">
+    <div class="form-group">
+      <label for="registerName">Nome Completo:</label>
+      <input type="text" id="registerName" required>
+    </div>
+    <div class="form-group">
+      <label for="registerEmail">E-mail:</label>
+      <input type="email" id="registerEmail" required>
+    </div>
+    <div class="form-group">
+      <label for="registerCRC">E-mail:</label>
+      <input type="text" id="registerCRC" required>
+    </div>
+    <div class="form-group">
+      <label for="registerSenha">Senha:</label>
+      <input type="password" id="registerSenha" required>
+    </div>
+    <button type="submit">Cadastrar</button>
+  </form>
+  <p>Já tem uma conta? <a href="index.html">Faça login</a></p>
+</div>
+
+<script src="js/script.js"></script>
+</body>
+</html>

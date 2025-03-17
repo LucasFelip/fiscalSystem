@@ -181,6 +181,7 @@ export default function gerarPDF(tipoIR, resultado, dados) {
     }
     
     doc.text(doc.splitTextToSize(notaExplicativa, pageWidth - margin * 2), margin, yPosition);
+    const footerStartY = pageHeight - 40;
 
     // Assinatura digital
     const assinatura = getSignatureInfo();

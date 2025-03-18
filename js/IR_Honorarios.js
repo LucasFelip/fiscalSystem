@@ -1,4 +1,9 @@
 export default {
+    /**
+     * Calcula o imposto e o valor líquido para honorários.
+     * @param {object} dados
+     * @returns {object}
+     */
     calcular(dados) {
         const valorBruto = dados.valorBruto;
         let imposto = 0;

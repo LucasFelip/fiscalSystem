@@ -1,19 +1,16 @@
-// Simulando um "banco de dados" no localStorage
-let usuarios = JSON.parse(localStorage.getItem('usuarios')) || [];
+import { formatarCRC } from './formatFields.js';
 
-// Aguarda o carregamento completo do DOM
 document.addEventListener("DOMContentLoaded", () => {
-    let usuarios = JSON.parse(localStorage.getItem('usuarios')) || [];
+    const usuarios = JSON.parse(localStorage.getItem('usuarios')) || [];
+    const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado'));
 
     const userNameSpan = document.getElementById("userName");
     const userCrcSpan = document.getElementById("userCrc");
     const logoutBtn = document.getElementById("logoutBtn");
-    const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado'));
 
-    // Verifica se o usuário está logado na main.html
     if (userNameSpan && usuarioLogado) {
         userNameSpan.textContent = usuarioLogado.nomeCompleto;
-        userCrcSpan.textContent = usuarioLogado.crc;
+        userCrcSpan.textContent = formatarCRC(usuarioLogado.crc);
     }
 
     if (logoutBtn) {
@@ -23,16 +20,16 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // ✅ Cadastro de usuário
+    // Cadastro de usuário
     const registerForm = document.getElementById("registerForm");
     if (registerForm) {
-        registerForm.addEventListener("submit", async (e) => {
+        registerForm.addEventListener("submit", (e) => {
             e.preventDefault();
 
-            const nome = document.getElementById("registerName").value;
-            const email = document.getElementById("registerEmail").value;
-            const crc = document.getElementById("registerCRC").value;
-            const senha = document.getElementById("registerSenha").value;
+            const nome = document.getElementById("registerName")?.value.trim();
+            const email = document.getElementById("registerEmail")?.value.trim();
+            const crc = document.getElementById("registerCRC")?.value.trim();
+            const senha = document.getElementById("registerSenha")?.value;
 
             if (!nome || !email || !senha || !crc) {
                 alert("Preencha todos os campos!");
@@ -44,9 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            console.log("Processando cadastro..."); // Debug
-
-            const novoUsuario = { nomeCompleto: nome, email, crc: crc, senha: senha };
+            const novoUsuario = { nomeCompleto: nome, email, crc, senha };
             usuarios.push(novoUsuario);
             localStorage.setItem("usuarios", JSON.stringify(usuarios));
 
@@ -55,16 +50,16 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // ✅ Login de usuário
+    // Login de usuário
     const loginForm = document.getElementById("loginForm");
     if (loginForm) {
-        loginForm.addEventListener("submit", async (e) => {
+        loginForm.addEventListener("submit", (e) => {
             e.preventDefault();
 
-            const email = document.getElementById("email").value;
-            const senha = document.getElementById("senha").value;
+            const email = document.getElementById("email")?.value.trim();
+            const senha = document.getElementById("senha")?.value;
 
-            const usuario = usuarios.find(user => user.email === email);
+            const usuario = usuarios.find(user => user.email === email && user.senha === senha);
 
             if (usuario) {
                 localStorage.setItem("usuarioLogado", JSON.stringify(usuario));

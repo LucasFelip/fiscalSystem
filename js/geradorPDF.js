@@ -1,5 +1,6 @@
+import { formatarCRC } from './formatFields.js';
+
 function getSignatureInfo() {
-    // Recupera o usuário logado do localStorage
     const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado'));
     if (!usuarioLogado) {
         return { nome: "N/A", crc: "N/A", dataHora: "N/A", hash: "N/A" };
@@ -16,7 +17,6 @@ function getSignatureInfo() {
         minute: '2-digit',
         second: '2-digit'
     };
-    // Data e hora detalhada em uma única chamada
     const dataHora = now.toLocaleString('pt-BR', options);
 
     // Geração simples de hash (algoritmo djb2)
@@ -30,25 +30,12 @@ function getSignatureInfo() {
     return { nome, crc, dataHora, hash: hashHex };
 }
 
-// Função para formatar o CRC corretamente (apenas para MA)
-function formatarCRC(crc) {
-    if (!crc) return "CRC N/A";
-
-    const regex = /(\d{5,6}\/O-\d)/;
-    const match = crc.match(regex);
-
-    return match ? `CRC-MA ${match[0]}` : crc;
-}
-
-// Função para formatar números no padrão brasileiro
 function formatarNumeroBR(valor, isPercent = false) {
     if (typeof valor !== "number") return valor;
-
     const formatted = valor.toLocaleString("pt-BR", {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
     });
-
     return isPercent ? `${formatted}%` : `R$ ${formatted}`;
 }
 
@@ -60,13 +47,12 @@ export default function gerarPDF(tipoIR, resultado, dados) {
 
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
     const margin = 20;
     let yPosition = margin;
 
-    // ──────────────── Título do Relatório  ────────────────
+    // Título do Relatório
     doc.setFont("helvetica", "bold");
     doc.setFontSize(16);
     doc.text("RELATÓRIO OFICIAL", pageWidth / 2, yPosition, { align: "center" });
@@ -79,7 +65,7 @@ export default function gerarPDF(tipoIR, resultado, dados) {
     doc.line(margin, yPosition, pageWidth - margin, yPosition);
     yPosition += 8;
 
-    // ──────────────── Dados do Processo ────────────────
+    // Dados do Processo
     doc.setFont("helvetica", "bold");
     doc.text("Dados do Processo", margin, yPosition);
     yPosition += 7;
@@ -93,7 +79,7 @@ export default function gerarPDF(tipoIR, resultado, dados) {
     doc.line(margin, yPosition, pageWidth - margin, yPosition);
     yPosition += 8;
 
-    // ──────────────── Cálculo ────────────────
+    // Seção de Cálculo
     doc.setFont("helvetica", "bold");
     doc.text("Cálculo", margin, yPosition);
     yPosition += 7;
@@ -165,25 +151,29 @@ export default function gerarPDF(tipoIR, resultado, dados) {
         yPosition += 10;
     }
 
-    // ──────────────── Nota Explicativa ────────────────
+    // Nota Explicativa
     doc.setFont("helvetica", "italic");
     doc.setFontSize(10);
     let notaExplicativa = "";
-
-    if (tipoIR === "honorarios") {
-        notaExplicativa = "Nota Explicativa: Dedução do IRRF, conforme a tabela progressiva contida na Lei nº 14.848/2024.";
-    } else if (tipoIR === "fepa") {
-        notaExplicativa = "Nota Explicativa: Base de Cálculo: Valor Bruto Corrigido (não incidindo juros); FEPA: 11% até 02/2020 e 7,5% a partir de 03/2020; IR (RRA): conforme Tabela Progressiva da Lei nº 14.848/2024.";
-    } else if (tipoIR === "rra") {
-        notaExplicativa = "Nota Explicativa: O cálculo do IR sobre RRA segue a tabela progressiva de tributação, levando em conta a média mensal dos valores acumulados e aplicando a dedução conforme legislação vigente (Lei nº 14.848/2024).";
-    } else if (tipoIR === "pj") {
-        notaExplicativa = "Nota Explicativa: O cálculo do IRPJ é baseado no regime de tributação da empresa. Empresas optantes pelo Simples Nacional estão isentas. Para demais empresas, aplicam-se as alíquotas conforme a atividade desempenhada.";
+    switch (tipoIR) {
+        case "honorarios":
+            notaExplicativa = "Nota Explicativa: Dedução do IRRF, conforme a tabela progressiva contida na Lei nº 14.848/2024.";
+            break;
+        case "fepa":
+            notaExplicativa = "Nota Explicativa: Base de Cálculo: Valor Bruto Corrigido (não incidindo juros); FEPA: 11% até 02/2020 e 7,5% a partir de 03/2020; IR (RRA): conforme Tabela Progressiva da Lei nº 14.848/2024.";
+            break;
+        case "rra":
+            notaExplicativa = "Nota Explicativa: O cálculo do IR sobre RRA segue a tabela progressiva de tributação, levando em conta a média mensal dos valores acumulados e aplicando a dedução conforme legislação vigente (Lei nº 14.848/2024).";
+            break;
+        case "pj":
+            notaExplicativa = "Nota Explicativa: O cálculo do IRPJ é baseado no regime de tributação da empresa. Empresas optantes pelo Simples Nacional estão isentas. Para demais empresas, aplicam-se as alíquotas conforme a atividade desempenhada.";
+            break;
     }
-    
-    doc.text(doc.splitTextToSize(notaExplicativa, pageWidth - margin * 2), margin, yPosition);
-    const footerStartY = pageHeight - 40;
 
-    // Assinatura digital
+    const notaLines = doc.splitTextToSize(notaExplicativa, pageWidth - margin * 2);
+    doc.text(notaLines, margin, yPosition);
+
+    const footerStartY = pageHeight - 40;
     const assinatura = getSignatureInfo();
     doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
@@ -191,7 +181,6 @@ export default function gerarPDF(tipoIR, resultado, dados) {
     doc.text(`CRC-MA: ${assinatura.crc}`, margin, footerStartY + 30);
     doc.text(`Data e Hora: ${assinatura.dataHora}`, margin, footerStartY + 35);
 
-    // Salva o PDF com o nome adequado
     doc.save(`relatorio_${tipoIR}_${dados.numeroProcesso}.pdf`);
     return doc;
 }

@@ -1,4 +1,9 @@
 export default {
+    /**
+     * Calcula o imposto para pessoa jurídica (PJ) com base nos dados informados.
+     * @param {object} dados
+     * @returns {object}
+     */
     calcular(dados) {
         const {
             numeroProcesso,
@@ -10,7 +15,6 @@ export default {
             ramoAtividade
         } = dados;
 
-        // Conversão dos valores numéricos
         const valorBrutoRPV = Number(valorBruto);
         const valorCorrigidoRPV = Number(valorCorrigido);
 
@@ -25,25 +29,23 @@ export default {
         if (optanteSimples === "nao") {
             switch (ramoAtividade) {
                 case "1":
-                    aliquotaIR = 0.048; // 4.8%
+                    aliquotaIR = 0.048;
                     descricaoRamo = "Modalidade Geral (4.8%)";
                     break;
                 case "2":
-                    aliquotaIR = 0.015; // 1.5%
+                    aliquotaIR = 0.015;
                     descricaoRamo = "Profissional Liberal (1.5%)";
                     break;
                 case "3":
-                    aliquotaIR = 0.01; // 1.0%
+                    aliquotaIR = 0.01;
                     descricaoRamo = "Cessão de Mão de Obra (1.0%)";
                     break;
                 default:
                     throw new Error("Ramo de atividade inválido.");
             }
-            // Cálculo do imposto
             impostoIR = Number((valorCorrigidoRPV * aliquotaIR).toFixed(2));
         }
 
-        // Cálculo do valor líquido
         const valorLiquido = Number((valorBrutoRPV - impostoIR).toFixed(2));
 
         return {
